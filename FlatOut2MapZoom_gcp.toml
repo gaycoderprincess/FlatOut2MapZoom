@@ -1,0 +1,6 @@
+# FlatOut 2 Map Zoom by Chloe @gaycoderprincess & FO2-Smiley
+# enjoy, nya~ :3
+
+[main]
+map_zoom_key = 0x70			# Key to change map zoom (Virtual key-code, F1 by default)
+hud_toggle_key = 0x71			# Key to toggle the HUD on and off (Virtual key-code, F2 by default)

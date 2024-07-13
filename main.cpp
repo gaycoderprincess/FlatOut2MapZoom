@@ -1,5 +1,9 @@
 #include <windows.h>
+#include "toml++/toml.hpp"
 #include "nya_commonhooklib.h"
+
+int nZoomKey = VK_F1;
+int nHUDKey = VK_F2;
 
 int nMapZoomState = 4;
 uint32_t bHUDToggle = 1;
@@ -79,15 +83,13 @@ void __fastcall KeyboardHook(uint16_t keyCode) {
 	(*(uint32_t*)0x8DA740)++;
 	if (((*(uint32_t*)0x8E84B0) & 1) == 0) return; // in race check
 
-	// map zoom
-	if (keyCode == VK_F1) {
+	if (keyCode == nZoomKey) {
 		nMapZoomState--;
 		if (nMapZoomState < 0) nMapZoomState = nNumMapZooms - 1;
 
 		memcpy((void*)0x8DC664, &aMapZooms[nMapZoomState], sizeof(tMapZoomSetup));
 	}
-	// HUD toggle
-	else if (keyCode == VK_F2) {
+	else if (keyCode == nHUDKey) {
 		fHUDToggleScale = (bHUDToggle = !bHUDToggle) ? 1.0 : 0.0;
 	}
 }
@@ -112,6 +114,10 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD fdwReason, LPVOID) {
 				MessageBoxA(nullptr, "Unsupported game version! Make sure you're using v1.2 (.exe size of 2990080 bytes)", "nya?!~", MB_ICONERROR);
 				return TRUE;
 			}
+
+			auto config = toml::parse_file("FlatOut2MapZoom_gcp.toml");
+			nZoomKey = config["main"]["zoom_key"].value_or(VK_F1);
+			nHUDKey = config["main"]["hud_toggle_key"].value_or(VK_F2);
 
 			NyaHookLib::PatchRelative(NyaHookLib::JMP, 0x477EC3, &HUDToggleASM1);
 			NyaHookLib::PatchRelative(NyaHookLib::JMP, 0x4982C3, &HUDToggleASM2);
