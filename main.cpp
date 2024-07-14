@@ -116,7 +116,7 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD fdwReason, LPVOID) {
 			}
 
 			auto config = toml::parse_file("FlatOut2MapZoom_gcp.toml");
-			nZoomKey = config["main"]["zoom_key"].value_or(VK_F1);
+			nZoomKey = config["main"]["map_zoom_key"].value_or(VK_F1);
 			nHUDKey = config["main"]["hud_toggle_key"].value_or(VK_F2);
 
 			NyaHookLib::PatchRelative(NyaHookLib::JMP, 0x477EC3, &HUDToggleASM1);
