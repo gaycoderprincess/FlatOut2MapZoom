@@ -47,38 +47,6 @@ void __attribute__((naked)) HUDToggleASM2() {
 	);
 }
 
-int nMapZoomValue;
-int __fastcall MapZoomSetup(uint32_t _zoomValue) {
-	auto zoomValue = *(float*)&_zoomValue;
-	if (zoomValue > 0.8f) return nMapZoomValue = -65536;
-	if (zoomValue > 0.6f) return nMapZoomValue = -84644;
-	if (zoomValue > 0.4f) return nMapZoomValue = -13252;
-	if (zoomValue > 0.2f) return nMapZoomValue = -7819;
-	if (zoomValue > 0.1f) return nMapZoomValue = -64;
-	return nMapZoomValue = -1;
-}
-
-uintptr_t MapZoomSetupASM_jmp = 0x4BDCFB;
-void __attribute__((naked)) MapZoomSetupASM() {
-	__asm__ (
-		"cmp ebx, [esp+0xCC]\n\t"
-		"mov eax, [esp+0x30]\n\t"
-		"jz loc_4BDCFB\n\t"
-
-		"pushad\n\t"
-		"mov ecx, [ebx+0x33C]\n\t"
-		"mov ecx, [ecx+0x6AA0]\n\t"
-		"call %1\n\t"
-		"popad\n\t"
-		"mov eax, %2\n\t"
-
-		"loc_4BDCFB:\n\t"
-		"jmp %0\n\t"
-			:
-			:  "m" (MapZoomSetupASM_jmp), "i" (MapZoomSetup), "m" (nMapZoomValue)
-	);
-}
-
 void __fastcall KeyboardHook(uint16_t keyCode) {
 	(*(uint32_t*)0x8DA740)++;
 	if (((*(uint32_t*)0x8E84B0) & 1) == 0) return; // in race check
@@ -111,7 +79,8 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD fdwReason, LPVOID) {
 	switch( fdwReason ) {
 		case DLL_PROCESS_ATTACH: {
 			if (NyaHookLib::GetEntryPoint() != 0x202638) {
-				MessageBoxA(nullptr, "Unsupported game version! Make sure you're using v1.2 (.exe size of 2990080 bytes)", "nya?!~", MB_ICONERROR);
+				MessageBoxA(nullptr, "Unsupported game version! Make sure you're using DRM-free v1.2 (.exe size of 2990080 bytes)", "nya?!~", MB_ICONERROR);
+				exit(0);
 				return TRUE;
 			}
 
@@ -121,7 +90,6 @@ BOOL WINAPI DllMain(HINSTANCE, DWORD fdwReason, LPVOID) {
 
 			NyaHookLib::PatchRelative(NyaHookLib::JMP, 0x477EC3, &HUDToggleASM1);
 			NyaHookLib::PatchRelative(NyaHookLib::JMP, 0x4982C3, &HUDToggleASM2);
-			NyaHookLib::PatchRelative(NyaHookLib::JMP, 0x4BDCEA, &MapZoomSetupASM);
 			NyaHookLib::PatchRelative(NyaHookLib::JMP, 0x55AB4A, &KeyboardHookSetupASM);
 		} break;
 		default:
