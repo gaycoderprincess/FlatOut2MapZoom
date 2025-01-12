@@ -1,6 +1,7 @@
 #include <windows.h>
 #include "toml++/toml.hpp"
 #include "nya_commonhooklib.h"
+#include "../nya-common-fouc/fo2versioncheck.h"
 
 int nZoomKey = VK_F1;
 int nHUDKey = VK_F2;
@@ -78,12 +79,8 @@ void __attribute__((naked)) KeyboardHookSetupASM() {
 BOOL WINAPI DllMain(HINSTANCE, DWORD fdwReason, LPVOID) {
 	switch( fdwReason ) {
 		case DLL_PROCESS_ATTACH: {
-			if (NyaHookLib::GetEntryPoint() != 0x202638) {
-				MessageBoxA(nullptr, "Unsupported game version! Make sure you're using DRM-free v1.2 (.exe size of 2990080 bytes)", "nya?!~", MB_ICONERROR);
-				exit(0);
-				return TRUE;
-			}
-
+			DoFlatOutVersionCheck(FO2Version::FO2_1_2);
+			
 			auto config = toml::parse_file("FlatOut2MapZoom_gcp.toml");
 			nZoomKey = config["main"]["map_zoom_key"].value_or(VK_F1);
 			nHUDKey = config["main"]["hud_toggle_key"].value_or(VK_F2);
